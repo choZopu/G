@@ -539,6 +539,28 @@
 
       const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwItSxicK6OAxbydCxMULcmB4fcYWsXCopfiEn3elSGj8pHIMztZ9ote0rZ1Jtx6JJt/exec"; // <<-- ใส่ URL Web App จริง
 
+      newSurveyBtn.addEventListener('click', function () {
+        // รีเซ็ต form และแสดงฟอร์มใหม่
+        form.reset();
+        // เคลียร์การแสดงค่า ph, temp
+        waterTempDisplay.textContent = waterTempSlider.value;
+        airTempDisplay.textContent = airTempSlider.value;
+        otherLocationTypeContainer.classList.add('hidden');
+
+        // ลบรายการยุงเกินตัวแรก (เหลือตัวเดียว)
+        const entries = document.querySelectorAll('.mosquito-entry');
+        for (let i = 1; i < entries.length; i++) {
+          entries[i].remove();
+        }
+        if (entries.length > 0) {
+          entries[0].querySelector('.remove-mosquito').classList.add('hidden');
+        }
+
+        savedDataContainer.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
       form.addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -621,31 +643,10 @@
           })
           .catch(err => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ' + err));
       });
+
     });
-
-
     // ปุ่มบันทึกข้อมูลใหม่ ให้รีเซ็ตฟอร์ม
-    newSurveyBtn.addEventListener('click', function () {
-      // รีเซ็ต form และแสดงฟอร์มใหม่
-      form.reset();
-      // เคลียร์การแสดงค่า ph, temp
-      waterTempDisplay.textContent = waterTempSlider.value;
-      airTempDisplay.textContent = airTempSlider.value;
-      otherLocationTypeContainer.classList.add('hidden');
 
-      // ลบรายการยุงเกินตัวแรก (เหลือตัวเดียว)
-      const entries = document.querySelectorAll('.mosquito-entry');
-      for (let i = 1; i < entries.length; i++) {
-        entries[i].remove();
-      }
-      if (entries.length > 0) {
-        entries[0].querySelector('.remove-mosquito').classList.add('hidden');
-      }
-
-      savedDataContainer.classList.add('hidden');
-      formContainer.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
 
   </script>
 
