@@ -24,7 +24,7 @@
       const data = Object.fromEntries(formData.entries());
 
       try {
-        const response = await fetch("https://script.google.com/macros/s/YOUR_DEPLOYED_WEBAPP_ID/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwItSxicK6OAxbydCxMULcmB4fcYWsXCopfiEn3elSGj8pHIMztZ9ote0rZ1Jtx6JJt/exec", {
           method: "POST",
           body: JSON.stringify(data),
           headers: { "Content-Type": "application/json" }
