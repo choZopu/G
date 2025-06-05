@@ -539,23 +539,6 @@
 
       const GAS_WEB_APP_URL = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbwItSxicK6OAxbydCxMULcmB4fcYWsXCopfiEn3elSGj8pHIMztZ9ote0rZ1Jtx6JJt/exec");
 
-      fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-        .then(res => res.json())
-        .then(response => {
-          if (response.status === 'success') {
-            formContainer.classList.add('hidden');
-            savedDataContainer.classList.remove('hidden');
-          } else {
-            alert('เกิดข้อผิดพลาด: ' + response.message);
-          }
-        })
-        .catch(err => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ' + err));
-
-
       newSurveyBtn.addEventListener('click', function () {
         // รีเซ็ต form และแสดงฟอร์มใหม่
         form.reset();
@@ -577,6 +560,89 @@
         formContainer.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
+
+      form.addEventListener('submit', function (e) {
+
+        const formData = new FormData(form);
+        const data = {};
+
+        for (const [key, value] of formData.entries()) {
+          if (key.endsWith('[]')) {
+            const cleanKey = key.replace('[]', '');
+            if (!data[cleanKey]) {
+              data[cleanKey] = [];
+            }
+            data[cleanKey].push(value);
+          } else {
+            data[key] = value;
+          }
+        }
+
+        if (data.locationType === 'other') {
+          data.locationType = data.otherLocationType || 'อื่นๆ';
+        }
+
+        const mosquitoData = [];
+        if (Array.isArray(data.mosquitoType)) {
+          for (let i = 0; i < data.mosquitoType.length; i++) {
+            let type = data.mosquitoType[i];
+            if (type === 'other') {
+              type = (data.otherMosquitoType && data.otherMosquitoType[i])
+                ? data.otherMosquitoType[i]
+                : 'อื่นๆ';
+            }
+            const code = (data.mosquitoCode && data.mosquitoCode[i]) ? data.mosquitoCode[i] : '-';
+            if (type) {
+              mosquitoData.push({ type: type, code: code });
+            }
+          }
+        }
+
+        const phValue = parseFloat(data.phValue);
+        let phStatusText = '';
+        if (phValue < 7) {
+          phStatusText = 'กรด (Acidic)';
+        } else if (phValue > 7) {
+          phStatusText = 'เบส (Basic/Alkaline)';
+        } else {
+          phStatusText = 'กลาง (Neutral)';
+        }
+
+        const waterC = parseFloat(data.waterTemp);
+        const waterCK = isNaN(waterC) ? 0.0 : waterC + 273;
+        const airC = parseFloat(data.airTemp);
+        const airCK = isNaN(airC) ? 0.0 : airC + 273;
+
+        const payload = {
+          surveyorName: data.surveyorName || '',
+          surveyDate: data.surveyDate || '',
+          coordinates: data.coordinates || '',
+          locationType: data.locationType || '',
+          phValue: data.phValue || '',
+          phStatus: phStatusText,
+          waterTemp: `${data.waterTemp || ''}°C / ${waterCK.toFixed(2)}K`,
+          airTemp: `${data.airTemp || ''}°C / ${airCK.toFixed(2)}K`,
+          mosquitoData: mosquitoData,
+          notes: data.notes || ''
+        };
+
+        fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+          .then(res => res.json())
+          .then(response => {
+            if (response.status === 'success') {
+              formContainer.classList.add('hidden');
+              savedDataContainer.classList.remove('hidden');
+            } else {
+              alert('เกิดข้อผิดพลาด: ' + response.message);
+            }
+          })
+          .catch(err => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ' + err));
+      });
+
     });
     // ปุ่มบันทึกข้อมูลใหม่ ให้รีเซ็ตฟอร์ม
 
